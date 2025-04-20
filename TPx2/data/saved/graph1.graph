@@ -1,0 +1,14 @@
+# Vertices
+A
+B
+C
+D
+E
+# Edges (source,destination,weight)
+A,B,4.00
+A,C,2.00
+B,C,5.00
+B,D,10.00
+C,D,3.00
+D,E,7.00
+C,E,4.00

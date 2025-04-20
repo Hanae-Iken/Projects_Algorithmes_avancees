@@ -1,0 +1,15 @@
+
+6
+Paris
+Lyon
+Marseille
+Nice
+Bordeaux
+Toulouse
+Paris Lyon 465
+Paris Bordeaux 580
+Lyon Marseille 315
+Lyon Nice 340
+Bordeaux Toulouse 250
+Marseille Nice 190
+Marseille Toulouse 400

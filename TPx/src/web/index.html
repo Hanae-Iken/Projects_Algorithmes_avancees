@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Éditeur de Graphe</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/vis-network.min.js"></script>
+</head>
+<body>
+<header>
+    <h1>Éditeur de Graphe Interactif</h1>
+    <p>Créez et modifiez vos graphes facilement, puis exportez-les pour votre application Java</p>
+</header>
+
+<div class="container">
+    <div class="sidebar">
+        <div class="panel">
+            <h3>Instructions</h3>
+            <ul>
+                <li><strong>Double-clic</strong> sur un espace vide pour ajouter un nœud</li>
+                <li><strong>Clic</strong> sur un nœud puis glisser vers un autre pour créer une arête</li>
+                <li><strong>Double-clic</strong> sur un nœud ou une arête pour modifier ses propriétés</li>
+                <li><strong>Sélectionner</strong> un élément puis appuyer sur <strong>Suppr</strong> pour le supprimer</li>
+            </ul>
+        </div>
+
+        <div class="panel">
+            <h3>Contrôles</h3>
+            <div class="form-group">
+                <label for="nodeType">Type de nœud:</label>
+                <select id="nodeType">
+                    <option value="string">Chaîne</option>
+                    <option value="integer">Entier</option>
+                </select>
+            </div>
+
+            <div class="button-group">
+                <button id="addNodeBtn" class="btn primary">Ajouter un nœud</button>
+                <button id="clearBtn" class="btn danger">Effacer tout</button>
+            </div>
+
+            <div class="button-group">
+                <button id="exportBtn" class="btn success">Exporter</button>
+                <button id="importBtn" class="btn info">Importer</button>
+            </div>
+
+            <div class="button-group">
+                <button id="saveFileBtn" class="btn success">Sauvegarder fichier</button>
+            </div>
+        </div>
+
+        <div class="panel hidden" id="nodeForm">
+            <h3>Ajouter/Modifier un nœud</h3>
+            <div class="form-group">
+                <label for="nodeId">Valeur du nœud:</label>
+                <input type="text" id="nodeId" placeholder="Entrez la valeur">
+            </div>
+            <div class="button-group">
+                <button id="saveNodeBtn" class="btn success">Sauvegarder</button>
+                <button id="cancelNodeBtn" class="btn secondary">Annuler</button>
+            </div>
+        </div>
+
+        <div class="panel hidden" id="edgeForm">
+            <h3>Ajouter/Modifier une arête</h3>
+            <div class="form-group">
+                <label for="edgeWeight">Poids:</label>
+                <input type="number" id="edgeWeight" min="1" value="1">
+            </div>
+            <div class="button-group">
+                <button id="saveEdgeBtn" class="btn success">Sauvegarder</button>
+                <button id="cancelEdgeBtn" class="btn secondary">Annuler</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div id="network"></div>
+        <textarea id="exportArea" class="hidden" placeholder="Format du graphe exporté/importé"></textarea>
+    </div>
+</div>
+
+<footer>
+    <p>TP Graphes - Algorithmes de recherche - &copy; 2025</p>
+</footer>
+
+<script src="js/script.js"></script>
+</body>
+</html>

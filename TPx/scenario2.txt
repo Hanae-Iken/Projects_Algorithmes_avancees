@@ -1,0 +1,14 @@
+5
+Bob
+Eve
+Alice
+Charlie
+David
+Bob Alice 5
+Bob Charlie 2
+Bob David 4
+Eve Charlie 7
+Eve David 1
+Eve Alice 9
+Alice Charlie 3
+Charlie David 6

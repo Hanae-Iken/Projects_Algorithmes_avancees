@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualisation de Graphe</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/vis-network.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        #mynetwork {
+            width: 100%;
+            height: 800px;
+            border: 1px solid lightgray;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+
+        .info-panel {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+<h1>Visualisation du Graphe</h1>
+
+<div class="info-panel">
+    <h3>Informations sur le graphe</h3>
+    <div id="graph-info">
+        <p>Nombre de sommets: <span id="node-count"></span></p>
+        <p>Nombre d'arêtes: <span id="edge-count"></span></p>
+    </div>
+</div>
+
+<div id="mynetwork"></div>
+
+<script>
+    // Les données du graphe seront insérées ici
+    const nodes = new vis.DataSet([
+        // NODES_PLACEHOLDER
+    ]);
+
+    const edges = new vis.DataSet([
+        // EDGES_PLACEHOLDER
+    ]);
+
+    // Configuration de la visualisation
+    const container = document.getElementById('mynetwork');
+    const data = {
+        nodes: nodes,
+        edges: edges
+    };
+
+    const options = {
+        physics: {
+            barnesHut: {
+                gravitationalConstant: -80000,
+                springConstant: 0.001,
+                springLength: 200
+            }
+        },
+        edges: {
+            font: {
+                size: 12
+            },
+            widthConstraint: {
+                maximum: 90
+            }
+        },
+        nodes: {
+            shape: 'circle',
+            size: 25,
+            font: {
+                size: 14
+            }
+        }
+    };
+
+    // Créer le réseau
+    const network = new vis.Network(container, data, options);
+
+    // Mettre à jour les informations du graphe
+    document.getElementById('node-count').textContent = nodes.length;
+    document.getElementById('edge-count').textContent = edges.length;
+</script>
+</body>
+</html>
