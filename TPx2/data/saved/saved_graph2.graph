@@ -1,0 +1,7 @@
+# Vertices
+Paris
+Lyon
+Marseille
+# Edges (source,destination,weight)
+Paris,Lyon,450.00
+Lyon,Marseille,300.00

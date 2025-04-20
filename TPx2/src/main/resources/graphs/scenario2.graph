@@ -2,9 +2,6 @@
 Paris
 Lyon
 Marseille
-Toulouse
 # Edges (source,destination,weight)
 Paris,Lyon,450.0
-Paris,Toulouse,600.0
 Lyon,Marseille,300.0
-Toulouse,Marseille,400.0

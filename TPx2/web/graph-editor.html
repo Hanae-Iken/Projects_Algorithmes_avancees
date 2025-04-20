@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Éditeur de Graphes</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+    #toolbar {
+      margin-bottom: 20px;
+      padding: 10px;
+      background: #f0f0f0;
+      border-radius: 5px;
+    }
+    #graph-container {
+      width: 100%;
+      height: 600px;
+      border: 1px solid #ccc;
+      position: relative;
+      background: white;
+    }
+    .node {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #4CAF50;
+      color: white;
+      text-align: center;
+      line-height: 40px;
+      cursor: move;
+      user-select: none;
+    }
+    .edge {
+      position: absolute;
+      height: 2px;
+      background: #666;
+      transform-origin: 0 0;
+      pointer-events: none;
+    }
+    .edge-weight {
+      position: absolute;
+      background: white;
+      padding: 2px 5px;
+      border-radius: 3px;
+      font-size: 12px;
+    }
+    button {
+      padding: 8px 12px;
+      margin-right: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+<h1>Éditeur de Graphes</h1>
+<div id="toolbar">
+  <button id="add-node">Ajouter Sommet</button>
+  <button id="add-edge">Ajouter Arête</button>
+  <button id="save-graph">Sauvegarder</button>
+  <button id="load-graph">Charger</button>
+  <input type="file" id="file-input" accept=".graph" style="display: none;">
+  <span>Poids: <input type="number" id="edge-weight" value="1" min="0" step="0.1"></span>
+</div>
+<div id="graph-container"></div>
+
+<script>
+  // Variables globales
+  let nodes = [];
+  let edges = [];
+  let selectedNode = null;
+  let edgeMode = false;
+  let nodeCounter = 1;
+
+  // Éléments DOM
+  const container = document.getElementById('graph-container');
+  const addNodeBtn = document.getElementById('add-node');
+  const addEdgeBtn = document.getElementById('add-edge');
+  const saveBtn = document.getElementById('save-graph');
+  const loadBtn = document.getElementById('load-graph');
+  const fileInput = document.getElementById('file-input');
+  const weightInput = document.getElementById('edge-weight');
+
+  // Ajouter un nouveau sommet
+  addNodeBtn.addEventListener('click', () => {
+    const node = document.createElement('div');
+    node.className = 'node';
+    node.textContent = `N${nodeCounter++}`;
+    node.style.left = '100px';
+    node.style.top = '100px';
+
+    // Position aléatoire si ce n'est pas le premier nœud
+    if (nodes.length > 0) {
+      node.style.left = `${100 + Math.random() * 500}px`;
+      node.style.top = `${100 + Math.random() * 400}px`;
+    }
+
+    node.dataset.id = node.textContent;
+
+    // Gestion des événements
+    node.addEventListener('mousedown', startDrag);
+    node.addEventListener('click', handleNodeClick);
+
+    container.appendChild(node);
+    nodes.push({
+      element: node,
+      id: node.textContent,
+      x: parseInt(node.style.left),
+      y: parseInt(node.style.top)
+    });
+  });
+
+  // Mode ajout d'arête
+  addEdgeBtn.addEventListener('click', () => {
+    edgeMode = !edgeMode;
+    addEdgeBtn.style.backgroundColor = edgeMode ? '#4CAF50' : '';
+    if (!edgeMode) selectedNode = null;
+  });
+
+  // Gestion du clic sur un nœud
+  function handleNodeClick(e) {
+    if (!edgeMode) return;
+
+    e.stopPropagation();
+    const node = e.target;
+
+    if (!selectedNode) {
+      selectedNode = node;
+      node.style.backgroundColor = '#FF9800';
+    } else if (selectedNode === node) {
+      selectedNode.style.backgroundColor = '#4CAF50';
+      selectedNode = null;
+    } else {
+      createEdge(selectedNode, node);
+      selectedNode.style.backgroundColor = '#4CAF50';
+      selectedNode = null;
+    }
+  }
+
+  // Créer une arête entre deux nœuds
+  function createEdge(sourceNode, targetNode) {
+    const sourceId = sourceNode.dataset.id;
+    const targetId = targetNode.dataset.id;
+    const weight = parseFloat(weightInput.value);
+
+    // Vérifier si l'arête existe déjà
+    if (edges.some(edge =>
+            (edge.source === sourceId && edge.target === targetId) ||
+            (edge.source === targetId && edge.target === sourceId))) {
+      return;
+    }
+
+    const edge = {
+      source: sourceId,
+      target: targetId,
+      weight: weight,
+      element: null,
+      weightElement: null
+    };
+
+    updateEdgeElement(edge);
+    edges.push(edge);
+  }
+
+  // Mettre à jour l'élément visuel d'une arête
+  function updateEdgeElement(edge) {
+    const sourceNode = nodes.find(n => n.id === edge.source);
+    const targetNode = nodes.find(n => n.id === edge.target);
+
+    if (!sourceNode || !targetNode) return;
+
+    // Coordonnées
+    const x1 = sourceNode.x + 20;
+    const y1 = sourceNode.y + 20;
+    const x2 = targetNode.x + 20;
+    const y2 = targetNode.y + 20;
+
+    // Créer ou mettre à jour la ligne
+    if (!edge.element) {
+      edge.element = document.createElement('div');
+      edge.element.className = 'edge';
+      container.appendChild(edge.element);
+
+      edge.weightElement = document.createElement('div');
+      edge.weightElement.className = 'edge-weight';
+      edge.weightElement.textContent = edge.weight;
+      container.appendChild(edge.weightElement);
+    }
+
+    // Calculer la position et l'angle
+    const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+    const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+
+    // Appliquer les styles
+    edge.element.style.width = `${length}px`;
+    edge.element.style.left = `${x1}px`;
+    edge.element.style.top = `${y1}px`;
+    edge.element.style.transform = `rotate(${angle}deg)`;
+
+    // Positionner le poids
+    edge.weightElement.style.left = `${(x1 + x2) / 2 - 15}px`;
+    edge.weightElement.style.top = `${(y1 + y2) / 2 - 10}px`;
+  }
+
+  // Sauvegarder le graphe
+  saveBtn.addEventListener('click', () => {
+    let content = "# Vertices\n";
+
+    // Ajouter les sommets
+    nodes.forEach(node => {
+      content += `${node.id}\n`;
+    });
+
+    // Ajouter les arêtes
+    content += "# Edges (source,destination,weight)\n";
+    edges.forEach(edge => {
+      content += `${edge.source},${edge.target},${edge.weight}\n`;
+    });
+
+    // Créer et télécharger le fichier
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'graph.graph';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  // Charger un graphe
+  loadBtn.addEventListener('click', () => {
+    fileInput.click();
+  });
+
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target.result;
+      parseGraphFile(content);
+    };
+    reader.readAsText(file);
+  });
+
+  // Parser le fichier de graphe
+  function parseGraphFile(content) {
+    // Nettoyer l'éditeur
+    nodes.forEach(node => container.removeChild(node.element));
+    edges.forEach(edge => {
+      container.removeChild(edge.element);
+      container.removeChild(edge.weightElement);
+    });
+    nodes = [];
+    edges = [];
+    selectedNode = null;
+    edgeMode = false;
+    addEdgeBtn.style.backgroundColor = '';
+
+    const lines = content.split('\n');
+    let readingVertices = false;
+    let readingEdges = false;
+
+    lines.forEach(line => {
+      line = line.trim();
+      if (line.startsWith('# Vertices')) {
+        readingVertices = true;
+        readingEdges = false;
+        return;
+      }
+      if (line.startsWith('# Edges')) {
+        readingVertices = false;
+        readingEdges = true;
+        return;
+      }
+      if (line === '') return;
+
+      if (readingVertices) {
+        // Créer un nœud
+        const node = document.createElement('div');
+        node.className = 'node';
+        node.textContent = line;
+        node.dataset.id = line;
+        node.style.left = `${100 + Math.random() * 500}px`;
+        node.style.top = `${100 + Math.random() * 400}px`;
+
+        node.addEventListener('mousedown', startDrag);
+        node.addEventListener('click', handleNodeClick);
+
+        container.appendChild(node);
+        nodes.push({
+          element: node,
+          id: line,
+          x: parseInt(node.style.left),
+          y: parseInt(node.style.top)
+        });
+
+        // Mettre à jour le compteur
+        const num = parseInt(line.substring(1));
+        if (!isNaN(num) && num >= nodeCounter) {
+          nodeCounter = num + 1;
+        }
+      } else if (readingEdges) {
+        // Créer une arête
+        const parts = line.split(',');
+        if (parts.length === 3) {
+          const sourceId = parts[0].trim();
+          const targetId = parts[1].trim();
+          const weight = parseFloat(parts[2].trim());
+
+          const edge = {
+            source: sourceId,
+            target: targetId,
+            weight: weight,
+            element: null,
+            weightElement: null
+          };
+
+          updateEdgeElement(edge);
+          edges.push(edge);
+        }
+      }
+    });
+  }
+
+  // Fonctionnalité de glisser-déposer
+  function startDrag(e) {
+    e.preventDefault();
+    const node = e.target;
+    let startX = e.clientX;
+    let startY = e.clientY;
+    let startLeft = parseInt(node.style.left);
+    let startTop = parseInt(node.style.top);
+
+    function moveHandler(e) {
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      node.style.left = `${startLeft + dx}px`;
+      node.style.top = `${startTop + dy}px`;
+
+      // Mettre à jour les coordonnées dans le tableau
+      const nodeObj = nodes.find(n => n.element === node);
+      if (nodeObj) {
+        nodeObj.x = startLeft + dx;
+        nodeObj.y = startTop + dy;
+      }
+
+      // Mettre à jour toutes les arêtes connectées
+      edges.forEach(edge => {
+        if (edge.source === node.dataset.id || edge.target === node.dataset.id) {
+          updateEdgeElement(edge);
+        }
+      });
+    }
+
+    function upHandler() {
+      document.removeEventListener('mousemove', moveHandler);
+      document.removeEventListener('mouseup', upHandler);
+    }
+
+    document.addEventListener('mousemove', moveHandler);
+    document.addEventListener('mouseup', upHandler);
+  }
+
+  // Gestion du clic sur le conteneur pour sortir du mode arête
+  container.addEventListener('click', (e) => {
+    if (e.target === container && edgeMode && selectedNode) {
+      selectedNode.style.backgroundColor = '#4CAF50';
+      selectedNode = null;
+    }
+  });
+</script>
+</body>
+</html>
